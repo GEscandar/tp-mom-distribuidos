@@ -18,11 +18,11 @@ class MessageMiddlewareQueueRabbitMQ(MessageMiddlewareQueue):
         self.host = host
         self.queue_name = queue_name
         self.consuming = False
-        self.conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        self.conn = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         self.channel = self.conn.channel()
         
     def declare(self):
-        self.channel.queue_declare(
+        return self.channel.queue_declare(
             queue=self.queue_name, durable=True, arguments={"x-queue-type": "quorum"}
         )
 
@@ -86,11 +86,11 @@ class MessageMiddlewareExchangeRabbitMQ(MessageMiddlewareExchange):
         self.exchange_name = exchange_name
         self.routing_keys = routing_keys
         self.consuming = False
-        self.conn = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+        self.conn = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         self.channel = self.conn.channel()
         
     def declare(self):
-        self.channel.exchange_declare(exchange=self.exchange_name, exchange_type="direct")
+        return self.channel.exchange_declare(exchange=self.exchange_name, exchange_type="direct")
 
     def start_consuming(self, on_message_callback):
         def _callback(ch, method, properties, body):
